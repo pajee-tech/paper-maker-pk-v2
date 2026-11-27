@@ -1,0 +1,23 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const ts=require('typescript');
+// Use the project's TypeScript compiler to run dependency-free domain modules.
+require.extensions['.ts']=(module,filename)=>module._compile(ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2020,module:ts.ModuleKind.CommonJS}}).outputText,filename);
+const {scopeChapters,scopeFactor,scaleSection}=require('../lib/scope.ts');
+const {syllabusSignature,syllabusIncludes,readSyllabusEntries}=require('../lib/syllabusRules.ts');
+const {teachingDates,validDate}=require('../lib/calendarRules.ts');
+const {computeResults,classSummary}=require('../lib/grading.ts');
+const {buildOmrLayout,scoreMcq}=require('../lib/omrScan.ts');
+const chapters=[{number:3,isAlp:false},{number:1,isAlp:true},{number:2,isAlp:true}];
+test('Smart syllabus returns only explicitly approved chapters, in order',()=>assert.deepEqual(scopeChapters(chapters,'FULL',true).map(x=>x.number),[1,2]));
+test('Empty approved syllabus never falls back to full book',()=>assert.deepEqual(scopeChapters(chapters.map(x=>({...x,isAlp:false})),'FULL',true),[]));
+test('Full-book secondary mode includes all chapters',()=>assert.deepEqual(scopeChapters(chapters,'FULL',false).map(x=>x.number),[1,2,3]));
+test('Scope scaling keeps section choice valid',()=>{assert.equal(scopeFactor('HALF1',1,2),0.5);const s=scaleSection({questionType:'SHORT',count:8,attemptAny:5},0.5);assert.equal(s.count,4);assert.equal(s.attemptAny,3);});
+test('Published syllabus only includes exact mapped IDs and content',()=>{const q={id:'q1',type:'MCQ',text:'$x^2$',options:['A','B'],qNo:'1'};const rules=[{id:q.id,signature:syllabusSignature(q)}];assert.equal(syllabusIncludes(q,rules),true);assert.equal(syllabusIncludes({...q,text:'$x^3$'},rules),false);assert.equal(syllabusIncludes({...q,id:'q2'},rules),false);assert.deepEqual(readSyllabusEntries([null,{},...rules]),rules);});
+test('Calendar validates real dates, including leap years',()=>{assert.equal(validDate('2024-02-29'),true);assert.equal(validDate('2026-02-29'),false);assert.equal(validDate('2026-11-31'),false);});
+test('Teaching days exclude weekends and confirmed holidays, not tentative days',()=>assert.deepEqual(teachingDates('2026-11-23','2026-11-29',[{startDate:'2026-11-24',endDate:'2026-11-24'},{startDate:'2026-11-26',endDate:'2026-11-26',tentative:true}],[1,2,3,4,5]),['2026-11-23','2026-11-25','2026-11-26','2026-11-27']));
+test('Planner refuses an invalid or oversized date range',()=>{assert.throws(()=>teachingDates('2027-01-01','2026-01-01',[]));assert.throws(()=>teachingDates('2026-01-01','2028-01-01',[]));});
+test('Results distinguish pending, zero, absent and competition ties',()=>{const rows=computeResults([{rollNo:'1',studentName:'A',obtained:80},{rollNo:'2',studentName:'B',obtained:80},{rollNo:'3',studentName:'C',obtained:0},{rollNo:'4',studentName:'D',obtained:0,pending:true},{rollNo:'5',studentName:'E',obtained:0,absent:true}],100);assert.deepEqual(rows.map(r=>r.grade),['A+','A+','F','Pending','Absent']);assert.deepEqual(rows.map(r=>r.position),[1,1,3,null,null]);const summary=classSummary(rows);assert.equal(summary.pending,1);assert.equal(summary.absent,1);assert.equal(summary.failed,1);});
+test('OMR score treats blank and multiple bubbles as zero',()=>assert.deepEqual(scoreMcq(['A','MULTI',null,'C'],['A','B','C','D'],[2,1,1,1]),{correct:1,wrong:1,blank:1,multi:1,score:2}));
+test('OMR geometry produces unique bubble IDs for supported 4/5 choice layouts',()=>{for(const opts of [4,5]){const layout=buildOmrLayout(30,opts);assert.equal(layout.bubbles.length,60+30*opts);assert.equal(new Set(layout.bubbles.map(b=>b.key)).size,layout.bubbles.length);assert.ok(layout.bubbles.every(b=>b.u>0&&b.u<1&&b.v>0&&b.v<1));}});

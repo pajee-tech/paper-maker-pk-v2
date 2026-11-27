@@ -1,0 +1,1 @@
+TypeScript syntax: 111 files parsed; 0 parse errors. Not a semantic typecheck.

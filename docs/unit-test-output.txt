@@ -1,0 +1,80 @@
+
+> paper-maker-pk@2.0.0 test
+> node --test tests/*.test.cjs
+
+TAP version 13
+# Subtest: Smart syllabus returns only explicitly approved chapters, in order
+ok 1 - Smart syllabus returns only explicitly approved chapters, in order
+  ---
+  duration_ms: 1.815069
+  type: 'test'
+  ...
+# Subtest: Empty approved syllabus never falls back to full book
+ok 2 - Empty approved syllabus never falls back to full book
+  ---
+  duration_ms: 0.212024
+  type: 'test'
+  ...
+# Subtest: Full-book secondary mode includes all chapters
+ok 3 - Full-book secondary mode includes all chapters
+  ---
+  duration_ms: 0.112887
+  type: 'test'
+  ...
+# Subtest: Scope scaling keeps section choice valid
+ok 4 - Scope scaling keeps section choice valid
+  ---
+  duration_ms: 0.197302
+  type: 'test'
+  ...
+# Subtest: Published syllabus only includes exact mapped IDs and content
+ok 5 - Published syllabus only includes exact mapped IDs and content
+  ---
+  duration_ms: 0.801487
+  type: 'test'
+  ...
+# Subtest: Calendar validates real dates, including leap years
+ok 6 - Calendar validates real dates, including leap years
+  ---
+  duration_ms: 0.579098
+  type: 'test'
+  ...
+# Subtest: Teaching days exclude weekends and confirmed holidays, not tentative days
+ok 7 - Teaching days exclude weekends and confirmed holidays, not tentative days
+  ---
+  duration_ms: 0.326283
+  type: 'test'
+  ...
+# Subtest: Planner refuses an invalid or oversized date range
+ok 8 - Planner refuses an invalid or oversized date range
+  ---
+  duration_ms: 0.284391
+  type: 'test'
+  ...
+# Subtest: Results distinguish pending, zero, absent and competition ties
+ok 9 - Results distinguish pending, zero, absent and competition ties
+  ---
+  duration_ms: 0.855167
+  type: 'test'
+  ...
+# Subtest: OMR score treats blank and multiple bubbles as zero
+ok 10 - OMR score treats blank and multiple bubbles as zero
+  ---
+  duration_ms: 0.519649
+  type: 'test'
+  ...
+# Subtest: OMR geometry produces unique bubble IDs for supported 4/5 choice layouts
+ok 11 - OMR geometry produces unique bubble IDs for supported 4/5 choice layouts
+  ---
+  duration_ms: 0.705244
+  type: 'test'
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 486.829911
