@@ -5,7 +5,7 @@
   "description": "PaperMaker PK by Pajee Technologies \u2014 exam paper generator, textbook library & instant result maker for Pakistani institutions (Playgroup to BS).",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": prisma generate && npx prisma db push && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
